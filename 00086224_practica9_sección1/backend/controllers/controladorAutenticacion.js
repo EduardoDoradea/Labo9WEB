@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../middleware/token.js"
 import { pool } from "../data/conexion.js";
 import bcrypt from 'bcrypt';
+import hashPassword from "../utils/funcionHash.js"
 
 const signin = async (req, res) => {
     const { email, password } = req.body;
@@ -39,11 +40,11 @@ const signup = async (req, res) => {
     if (!name || !email || !password) {
         return res.status(400).json({ message: 'Faltan campos: nombre, email o contrasenia' });
     }
-
-    const hashedPassword = await bcrypt.hash(String(password), 10);
+    const passwordHash = await hashPassword.hashPassword(password);
+    //const hashedPassword = await bcrypt.hash(String(password), 10);
 
     pool.query('INSERT INTO users (name, email, password) VALUES ($1, $2, $3)',
-        [name, email, hashedPassword], (error, results) => {
+        [name, email, passwordHash], (error, results) => {
             if (error) {
                 console.error("Error al obtener usuarios:", error);
                 res.status(500).json({ error: "Error interno del servidor" });

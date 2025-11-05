@@ -1,6 +1,6 @@
 
 import { pool } from "../data/conexion.js";
-import bcrypt from 'bcrypt';
+import hashPassword from "../utils/funcionHash.js"
 
 const displayHome = (request, response) => {
     response.status(200).json({ message: "Bienvenido a la API."})
@@ -39,10 +39,10 @@ const updateUser = async (request, response) => {
     const id = parseInt(request.params.id);
 
     if (password) {
+        const passwordHash = await hashPassword.hashPassword(password);
+        //const hashedPassword = await bcrypt.hash(String(password), 10);
 
-        const hashedPassword = await bcrypt.hash(String(password), 10);
-
-        pool.query("UPDATE users SET name = $2, email = $3, password = $4 WHERE id = $1", [id, name, email, hashedPassword], (error, results) => {
+        pool.query("UPDATE users SET name = $2, email = $3, password = $4 WHERE id = $1", [id, name, email, passwordHash], (error, results) => {
             if (error) {
                 console.error("Error al actualizar el usuario:", error);
                 response.status(500).json({ error: "Error interno del servidor" });
